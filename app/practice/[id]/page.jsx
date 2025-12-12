@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { db } from "/lib/firebase";
+import { db } from "../../../lib/firebase";
 import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import CheckAuth from "../../../lib/CheckAuth";
 
