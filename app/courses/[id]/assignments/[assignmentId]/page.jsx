@@ -429,22 +429,198 @@
       setShowConfirmDialog(true);
     };
 
+    // const handleConfirmSubmit = async () => {
+    //   if (!auth.currentUser) return;
+
+    //   setShowConfirmDialog(false);
+    //   setSubmitting(true);
+    //   try {
+    //     // If coding assignment, run all test cases (visible + hidden) again before submitting
+    //     let resultStatus = null;
+    //     let testSummary = null;
+    //     if (assignment?.type === 'coding') {
+    //       const allTestCases = (assignment.questions || [])
+    //         .flatMap((q) => Array.isArray(q.testCases) ? q.testCases : [])
+    //         .filter(Boolean);
+    //       let passCount = 0;
+    //       let totalCount = allTestCases.length;
+    //       let hadCompilerError = false;
+    //       if (totalCount > 0) {
+    //         for (const tc of allTestCases) {
+    //           try {
+    //             const res = await fetch('/api/compile', {
+    //               method: 'POST',
+    //               headers: { 'Content-Type': 'application/json' },
+    //               body: JSON.stringify({
+    //                 language: submission.language,
+    //                 source: submission.codingSolution,
+    //                 stdin: transformForCompiler(tc.input), // Transform input for compiler
+    //               }),
+    //             });
+    //             if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    //             const data = await res.json();
+    //             const actual = (data.stdout || '').trim();
+    //             const expected = (tc.expectedOutput || tc.output || '').trim();
+    //             const stderr = (data.stderr || '').trim();
+    //             if (stderr) hadCompilerError = true;
+    //             if (actual.toLowerCase() === expected.toLowerCase()) {
+    //               passCount += 1;
+    //             }
+    //           } catch (_) {
+    //             // Treat as failed test
+    //           }
+    //         }
+    //       }
+    //       // Determine result status
+    //       if (totalCount > 0 && passCount === totalCount) {
+    //         resultStatus = 'success';
+    //       } else if (passCount > 0 && !hadCompilerError) {
+    //         resultStatus = 'partial';
+    //       } else {
+    //         resultStatus = 'fail';
+    //       }
+    //       testSummary = { passCount, totalCount };
+    //     } else if (assignment?.type === 'mcq') {
+    //       const questions = assignment.questions || [];
+    //       const totalCount = questions.length;
+    //       let totalScore = 0;
+    //       let maxPossibleScore = 0;
+          
+    //       if (totalCount > 0) {
+    //         for (let i = 0; i < questions.length; i++) {
+    //           const q = questions[i];
+    //           const userAnswer = submission.mcqAnswers?.[i];
+              
+    //           // Handle multiple correct answers with partial scoring
+    //           if (Array.isArray(q.correctAnswers)) {
+    //             const correctAnswers = q.correctAnswers;
+    //             const totalCorrectOptions = correctAnswers.length;
+    //             maxPossibleScore += 1; // Each question is worth 1 point
+                
+    //             if (Array.isArray(userAnswer) && userAnswer.length > 0) {
+    //               // Calculate partial score based on correct selections
+    //               let correctSelections = 0;
+    //               let wrongSelections = 0;
+                  
+    //               // Count correct selections
+    //               for (const selectedIndex of userAnswer) {
+    //                 if (correctAnswers.includes(selectedIndex)) {
+    //                   correctSelections++;
+    //                 } else {
+    //                   wrongSelections++;
+    //                 }
+    //               }
+                  
+    //               // Calculate partial score: (correct_selections - wrong_selections) / total_correct_options
+    //               // But ensure score doesn't go below 0
+    //               const partialScore = Math.max(0, (correctSelections - wrongSelections) / totalCorrectOptions);
+    //               totalScore += partialScore;
+    //             }
+    //           } 
+    //           // Handle legacy single correct answer
+    //           else if (typeof q.correctAnswer === 'number') {
+    //             maxPossibleScore += 1;
+    //             if (userAnswer === q.correctAnswer) {
+    //               totalScore += 1;
+    //             }
+    //           }
+    //         }
+    //       }
+          
+    //       // Convert to passCount for compatibility
+    //       const passCount = Math.round(totalScore);
+          
+    //       if (totalCount > 0 && totalScore === maxPossibleScore) {
+    //         resultStatus = 'success';
+    //       } else if (totalScore > 0) {
+    //         resultStatus = 'partial';
+    //       } else {
+    //         resultStatus = 'fail';
+    //       }
+    //       testSummary = { passCount, totalCount, partialScore: totalScore, maxScore: maxPossibleScore };
+    //     }
+
+    //     const baseData = {
+    //       studentId: auth.currentUser.uid,
+    //       studentName: auth.currentUser.displayName || auth.currentUser.email,
+    //       submittedAt: serverTimestamp(),
+    //       resultStatus,
+    //       testSummary,
+    //       ...submission,
+    //     };
+
+    //     const autoScore = testSummary?.maxScore
+    //       ? Math.round((testSummary.partialScore / testSummary.maxScore) * 100)
+    //       : testSummary?.totalCount
+    //       ? Math.round((testSummary.passCount / testSummary.totalCount) * 100)
+    //       : null;
+
+    //     const submissionData = autoScore !== null ? { ...baseData, autoScore } : baseData;
+
+    //     // Use the appropriate collection path (courses or copiedcourses)
+    //     // For copied courses, use the actual copied course ID, not the master course ID
+    //     const courseIdToUse = isCopiedCourse ? (courseId || course?.id) : (courseId || course?.id);
+    //     const collectionPath = isCopiedCourse ? "copiedcourses" : "courses";
+        
+    //     if (existingSubmission) {
+    //       // Update existing submission in MCQ Firebase
+    //       await updateDoc(
+    //         doc(mcqDb, collectionPath, courseIdToUse, "assignments", assignmentId, "submissions", existingSubmission.id),
+    //         submissionData
+    //       );
+    //     } else {
+    //       // Create new submission in MCQ Firebase
+    //       await addDoc(
+    //         collection(mcqDb, collectionPath, courseIdToUse, "assignments", assignmentId, "submissions"),
+    //         submissionData
+    //       );
+    //     }
+
+    //     if (assignment?.type === 'coding') {
+    //       if (submissionData.resultStatus === 'success') {
+    //         alert('Submission result: Success - All tests passed');
+    //       } else if (submissionData.resultStatus === 'partial') {
+    //         alert(`Submission result: Partial - ${submissionData.testSummary?.passCount || 0}/${submissionData.testSummary?.totalCount || 0} tests passed`);
+    //       } else {
+    //         alert('Submission result: Fail - 0 tests passed or compiler error');
+    //       }
+    //     } else {
+    //       const scorePct = typeof submissionData.autoScore === 'number' ? `${submissionData.autoScore}%` : 'N/A';
+    //       alert(`Assignment submitted! MCQ Score: ${scorePct}`);
+    //     }
+    //     router.push(`/courses/${urlSlug}`);
+    //   } catch (error) {
+    //     console.error("Error submitting assignment:", error);
+    //     alert("Error submitting assignment. Please try again.");
+    //   } finally {
+    //     setSubmitting(false);
+    //   }
+    // };
+
+
+
     const handleConfirmSubmit = async () => {
       if (!auth.currentUser) return;
-
+    
       setShowConfirmDialog(false);
       setSubmitting(true);
+    
       try {
-        // If coding assignment, run all test cases (visible + hidden) again before submitting
         let resultStatus = null;
         let testSummary = null;
+    
+        // =========================
+        // CODING ASSIGNMENT
+        // =========================
         if (assignment?.type === 'coding') {
           const allTestCases = (assignment.questions || [])
             .flatMap((q) => Array.isArray(q.testCases) ? q.testCases : [])
             .filter(Boolean);
+    
           let passCount = 0;
           let totalCount = allTestCases.length;
           let hadCompilerError = false;
+    
           if (totalCount > 0) {
             for (const tc of allTestCases) {
               try {
@@ -454,24 +630,27 @@
                   body: JSON.stringify({
                     language: submission.language,
                     source: submission.codingSolution,
-                    stdin: transformForCompiler(tc.input), // Transform input for compiler
+                    stdin: transformForCompiler(tc.input),
                   }),
                 });
+    
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    
                 const data = await res.json();
                 const actual = (data.stdout || '').trim();
                 const expected = (tc.expectedOutput || tc.output || '').trim();
                 const stderr = (data.stderr || '').trim();
+    
                 if (stderr) hadCompilerError = true;
                 if (actual.toLowerCase() === expected.toLowerCase()) {
                   passCount += 1;
                 }
               } catch (_) {
-                // Treat as failed test
+                // failed test
               }
             }
           }
-          // Determine result status
+    
           if (totalCount > 0 && passCount === totalCount) {
             resultStatus = 'success';
           } else if (passCount > 0 && !hadCompilerError) {
@@ -479,57 +658,67 @@
           } else {
             resultStatus = 'fail';
           }
+    
           testSummary = { passCount, totalCount };
-        } else if (assignment?.type === 'mcq') {
+        }
+    
+        // =========================
+        // MCQ ASSIGNMENT (FIXED)
+        // =========================
+        else if (assignment?.type === 'mcq') {
           const questions = assignment.questions || [];
           const totalCount = questions.length;
+    
           let totalScore = 0;
           let maxPossibleScore = 0;
-          
-          if (totalCount > 0) {
-            for (let i = 0; i < questions.length; i++) {
-              const q = questions[i];
-              const userAnswer = submission.mcqAnswers?.[i];
-              
-              // Handle multiple correct answers with partial scoring
-              if (Array.isArray(q.correctAnswers)) {
-                const correctAnswers = q.correctAnswers;
-                const totalCorrectOptions = correctAnswers.length;
-                maxPossibleScore += 1; // Each question is worth 1 point
-                
-                if (Array.isArray(userAnswer) && userAnswer.length > 0) {
-                  // Calculate partial score based on correct selections
-                  let correctSelections = 0;
-                  let wrongSelections = 0;
-                  
-                  // Count correct selections
-                  for (const selectedIndex of userAnswer) {
-                    if (correctAnswers.includes(selectedIndex)) {
-                      correctSelections++;
-                    } else {
-                      wrongSelections++;
-                    }
-                  }
-                  
-                  // Calculate partial score: (correct_selections - wrong_selections) / total_correct_options
-                  // But ensure score doesn't go below 0
-                  const partialScore = Math.max(0, (correctSelections - wrongSelections) / totalCorrectOptions);
-                  totalScore += partialScore;
+    
+          const normalizeAnswer = (answer) => {
+            if (Array.isArray(answer)) return answer;
+            if (answer === undefined || answer === null) return [];
+            return [answer];
+          };
+    
+          for (let i = 0; i < questions.length; i++) {
+            const q = questions[i];
+            const userSelections = normalizeAnswer(submission.mcqAnswers?.[i]);
+    
+            // MULTIPLE CORRECT ANSWERS
+            if (Array.isArray(q.correctAnswers)) {
+              const correctAnswers = q.correctAnswers.map(Number);
+              const totalCorrectOptions = correctAnswers.length;
+    
+              maxPossibleScore += 1;
+    
+              let correctSelections = 0;
+              let wrongSelections = 0;
+    
+              for (const selected of userSelections) {
+                if (correctAnswers.includes(selected)) {
+                  correctSelections++;
+                } else {
+                  wrongSelections++;
                 }
-              } 
-              // Handle legacy single correct answer
-              else if (typeof q.correctAnswer === 'number') {
-                maxPossibleScore += 1;
-                if (userAnswer === q.correctAnswer) {
-                  totalScore += 1;
-                }
+              }
+    
+              const partialScore = Math.max(
+                0,
+                (correctSelections - wrongSelections) / totalCorrectOptions
+              );
+    
+              totalScore += partialScore;
+            }
+    
+            // SINGLE CORRECT ANSWER
+            else if (typeof q.correctAnswer === 'number') {
+              maxPossibleScore += 1;
+              if (userSelections.includes(q.correctAnswer)) {
+                totalScore += 1;
               }
             }
           }
-          
-          // Convert to passCount for compatibility
+    
           const passCount = Math.round(totalScore);
-          
+    
           if (totalCount > 0 && totalScore === maxPossibleScore) {
             resultStatus = 'success';
           } else if (totalScore > 0) {
@@ -537,9 +726,18 @@
           } else {
             resultStatus = 'fail';
           }
-          testSummary = { passCount, totalCount, partialScore: totalScore, maxScore: maxPossibleScore };
+    
+          testSummary = {
+            passCount,
+            totalCount,
+            partialScore: totalScore,
+            maxScore: maxPossibleScore,
+          };
         }
-
+    
+        // =========================
+        // SUBMISSION DATA
+        // =========================
         const baseData = {
           studentId: auth.currentUser.uid,
           studentName: auth.currentUser.displayName || auth.currentUser.email,
@@ -548,34 +746,35 @@
           testSummary,
           ...submission,
         };
-
+    
         const autoScore = testSummary?.maxScore
           ? Math.round((testSummary.partialScore / testSummary.maxScore) * 100)
           : testSummary?.totalCount
           ? Math.round((testSummary.passCount / testSummary.totalCount) * 100)
           : null;
-
-        const submissionData = autoScore !== null ? { ...baseData, autoScore } : baseData;
-
-        // Use the appropriate collection path (courses or copiedcourses)
-        // For copied courses, use the actual copied course ID, not the master course ID
-        const courseIdToUse = isCopiedCourse ? (courseId || course?.id) : (courseId || course?.id);
+    
+        const submissionData = autoScore !== null
+          ? { ...baseData, autoScore }
+          : baseData;
+    
+        const courseIdToUse = courseId || course?.id;
         const collectionPath = isCopiedCourse ? "copiedcourses" : "courses";
-        
+    
         if (existingSubmission) {
-          // Update existing submission in MCQ Firebase
           await updateDoc(
             doc(mcqDb, collectionPath, courseIdToUse, "assignments", assignmentId, "submissions", existingSubmission.id),
             submissionData
           );
         } else {
-          // Create new submission in MCQ Firebase
           await addDoc(
             collection(mcqDb, collectionPath, courseIdToUse, "assignments", assignmentId, "submissions"),
             submissionData
           );
         }
-
+    
+        // =========================
+        // USER FEEDBACK
+        // =========================
         if (assignment?.type === 'coding') {
           if (submissionData.resultStatus === 'success') {
             alert('Submission result: Success - All tests passed');
@@ -585,9 +784,12 @@
             alert('Submission result: Fail - 0 tests passed or compiler error');
           }
         } else {
-          const scorePct = typeof submissionData.autoScore === 'number' ? `${submissionData.autoScore}%` : 'N/A';
+          const scorePct = typeof submissionData.autoScore === 'number'
+            ? `${submissionData.autoScore}%`
+            : 'N/A';
           alert(`Assignment submitted! MCQ Score: ${scorePct}`);
         }
+    
         router.push(`/courses/${urlSlug}`);
       } catch (error) {
         console.error("Error submitting assignment:", error);
@@ -596,6 +798,7 @@
         setSubmitting(false);
       }
     };
+    
 
     const handleReview = () => {
       setShowConfirmDialog(false);
@@ -1746,3 +1949,5 @@
       </CheckAuth>
     );
   }
+
+

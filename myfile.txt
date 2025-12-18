@@ -55,6 +55,11 @@ body {
   }
 }
 
+/* Ensure cards and containers are visible */
+.bg-white\/\d+ {
+  background-color: #ffffff !important;
+}
+
 /* Fix any backdrop-blur elements */
 .backdrop-blur {
   backdrop-filter: none !important;
@@ -83,8 +88,7 @@ html {
 
 /* Better touch targets for mobile */
 @media (max-width: 768px) {
-  button,
-  a {
+  button, a {
     min-height: 44px;
     min-width: 44px;
   }
@@ -202,3 +206,7 @@ input:focus-visible {
 .animate-shimmer {
   animation: shimmer 2s infinite;
 }
+
+
+
+this is for the global css file
